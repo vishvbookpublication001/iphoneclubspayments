@@ -27,7 +27,7 @@ export async function POST(req) {
     const secret_key = process.env.WATCH_API_KEY;
 
     if (!merchant_id || !secret_key) {
-      return Response.json({ message: 'Environment variables are missing on Vercel' }, { status: 400 });
+      return Response.json({ message: 'Environment variables missing' }, { status: 400 });
     }
 
     const payload = {
@@ -48,14 +48,20 @@ export async function POST(req) {
       body: JSON.stringify(payload),
     });
 
-    const result = await response.json();
+    const responseText = await response.text();
+    let result;
+    try {
+      result = JSON.parse(responseText);
+    } catch (e) {
+      return Response.json({ message: 'Gateway HTML/Text Error: ' + responseText.substring(0, 150) }, { status: 500 });
+    }
 
     if (result.code === 0 && result.data && result.data.payment_url) {
       return Response.json({ paymentUrl: result.data.payment_url });
     } else {
-      return Response.json({ message: result.msg || 'Payment gateway returned an error' }, { status: 400 });
+      return Response.json({ message: result.msg || 'Gateway message: ' + JSON.stringify(result) }, { status: 400 });
     }
   } catch (error) {
-    return Response.json({ message: 'Server error: ' + error.message }, { status: 500 });
+    return Response.json({ message: 'Catch Error: ' + error.message }, { status: 500 });
   }
 }
