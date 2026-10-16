@@ -2,68 +2,72 @@
 import { useState } from 'react';
 
 export default function Home() {
-  const [amount, setAmount] = useState('');
   const [name, setName] = useState('');
+  const [amount, setAmount] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const handlePayment = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    if (!name || !amount) {
+      alert('Please fill all fields');
+      return;
+    }
 
+    setLoading(true);
     try {
       const res = await fetch('/api/pay', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount, name }),
+        body: JSON.stringify({ name, amount }),
       });
 
       const data = await res.json();
+
       if (data.paymentUrl) {
+        // Direct redirect to Watch Pay QR / Payment page
         window.location.href = data.paymentUrl;
       } else {
-        alert(data.message || 'Error aaya');
+        alert(data.message || 'Payment failed');
+        setLoading(false);
       }
     } catch (err) {
-      console.error(err);
-      alert('Kuch gadbad ho gayi.');
-    } finally {
+      alert('Error: ' + err.message);
       setLoading(false);
     }
   };
 
   return (
-    <div style={{ maxWidth: '400px', margin: '60px auto', padding: '20px', border: '1px solid #ddd', borderRadius: '8px', fontFamily: 'sans-serif' }}>
+    <main style={{ padding: '50px', fontFamily: 'sans-serif', maxWidth: '400px', margin: '0 auto' }}>
       <h2>iPhone Clubs Payment</h2>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handlePayment}>
         <div style={{ marginBottom: '15px' }}>
-          <label>Customer Name:</label>
-          <input 
-            type="text" 
-            required 
-            value={name} 
+          <label>Customer Name:</label><br />
+          <input
+            type="text"
+            value={name}
             onChange={(e) => setName(e.target.value)}
-            style={{ width: '100%', padding: '8px', marginTop: '5px', boxSizing: 'border-box' }}
+            required
+            style={{ width: '100%', padding: '8px', marginTop: '5px' }}
           />
         </div>
         <div style={{ marginBottom: '15px' }}>
-          <label>Enter Amount (₹):</label>
-          <input 
-            type="number" 
-            required 
-            placeholder="e.g. 19999"
-            value={amount} 
+          <label>Enter Amount (₹):</label><br />
+          <input
+            type="number"
+            value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            style={{ width: '100%', padding: '8px', marginTop: '5px', boxSizing: 'border-box' }}
+            required
+            style={{ width: '100%', padding: '8px', marginTop: '5px' }}
           />
         </div>
-        <button 
-          type="submit" 
+        <button
+          type="submit"
           disabled={loading}
-          style={{ width: '100%', padding: '10px', background: '#0070f3', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
+          style={{ width: '100%', padding: '10px', background: 'blue', color: 'white', border: 'none', cursor: 'pointer' }}
         >
           {loading ? 'Processing...' : 'Pay Now'}
         </button>
       </form>
-    </div>
+    </main>
   );
 }

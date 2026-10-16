@@ -55,13 +55,16 @@ export async function POST(req) {
     try {
       result = JSON.parse(responseText);
     } catch (e) {
-      return Response.json({ message: 'Gateway Response Parse Error' }, { status: 500 });
+      return Response.json({ message: 'Gateway Response Parse Error: ' + responseText.substring(0, 100) }, { status: 500 });
     }
 
-    if (result.code === 0 && result.data && result.data.payment_url) {
-      return Response.json({ paymentUrl: result.data.payment_url });
+    // Watch Pay response me 'pay_url' ya 'payment_url' ho sakta hai
+    const payUrl = result.data?.pay_url || result.data?.payment_url;
+
+    if ((result.code === 0 || result.code === '0') && payUrl) {
+      return Response.json({ paymentUrl: payUrl });
     } else {
-      return Response.json({ message: result.msg || 'Gateway message: ' + JSON.stringify(result) }, { status: 400 });
+      return Response.json({ message: result.msg || 'Gateway error: ' + JSON.stringify(result) }, { status: 400 });
     }
   } catch (error) {
     return Response.json({ message: 'Catch Error: ' + error.message }, { status: 500 });
