@@ -10,10 +10,10 @@ function generateSign(params, secretKey) {
     }, {});
 
   const queryString = Object.keys(filteredParams)
-    .map((key) => ${key}=${filteredParams[key]})
+    .map((key) => key + '=' + filteredParams[key])
     .join('&');
 
-  const stringSignTemp = ${queryString}&key=${secretKey};
+  const stringSignTemp = queryString + '&key=' + secretKey;
   return crypto.createHash('md5').update(stringSignTemp).digest('hex').toLowerCase();
 }
 
@@ -26,7 +26,7 @@ export async function POST(req) {
 
     const payload = {
       merchant_id: merchant_id,
-      order_id: ORD_${Date.now()},
+      order_id: 'ORD_' + Date.now(),
       amount: parseFloat(amount).toFixed(2),
       redirect_url: 'https://iphoneclubspayments.vercel.app/success',
       customer_name: name,
