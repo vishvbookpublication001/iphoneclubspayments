@@ -36,6 +36,7 @@ export async function POST(req) {
       amount: parseFloat(amount).toFixed(2),
       redirect_url: 'https://iphoneclubspayments.vercel.app/success',
       customer_name: name || 'Customer',
+      timestamp: Math.floor(Date.now() / 1000).toString(),
     };
 
     payload.sign = generateSign(payload, secret_key);
@@ -53,7 +54,7 @@ export async function POST(req) {
     try {
       result = JSON.parse(responseText);
     } catch (e) {
-      return Response.json({ message: 'Gateway HTML/Text Error: ' + responseText.substring(0, 150) }, { status: 500 });
+      return Response.json({ message: 'Gateway Response Parse Error' }, { status: 500 });
     }
 
     if (result.code === 0 && result.data && result.data.payment_url) {
