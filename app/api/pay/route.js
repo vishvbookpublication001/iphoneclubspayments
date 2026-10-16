@@ -40,7 +40,7 @@ export async function POST(req) {
 
     payload.sign = generateSign(payload, secret_key);
 
-    const response = await fetch('https://watchpayss.com/api/payin/create', {
+    const response = await fetch('https://watchpayss.com/api/public/v1/payin/create', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
