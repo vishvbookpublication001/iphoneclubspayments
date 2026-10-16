@@ -19,17 +19,23 @@ function generateSign(params, secretKey) {
 
 export async function POST(req) {
   try {
-    const { amount, name } = await req.json();
+    const body = await req.json();
+    const amount = body.amount;
+    const name = body.name;
 
     const merchant_id = process.env.WATCH_MERCHANT_ID;
     const secret_key = process.env.WATCH_API_KEY;
+
+    if (!merchant_id || !secret_key) {
+      return Response.json({ message: 'Environment variables are missing on Vercel' }, { status: 400 });
+    }
 
     const payload = {
       merchant_id: merchant_id,
       order_id: 'ORD_' + Date.now(),
       amount: parseFloat(amount).toFixed(2),
       redirect_url: 'https://iphoneclubspayments.vercel.app/success',
-      customer_name: name,
+      customer_name: name || 'Customer',
     };
 
     payload.sign = generateSign(payload, secret_key);
@@ -47,9 +53,9 @@ export async function POST(req) {
     if (result.code === 0 && result.data && result.data.payment_url) {
       return Response.json({ paymentUrl: result.data.payment_url });
     } else {
-      return Response.json({ message: result.msg || 'Payment link create nahi ho paya' }, { status: 400 });
+      return Response.json({ message: result.msg || 'Payment gateway returned an error' }, { status: 400 });
     }
   } catch (error) {
-    return Response.json({ message: error.message }, { status: 500 });
+    return Response.json({ message: 'Server error: ' + error.message }, { status: 500 });
   }
 }
