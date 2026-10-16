@@ -32,9 +32,10 @@ export async function POST(req) {
 
     const payload = {
       merchant_id: merchant_id,
-      order_id: 'ORD_' + Date.now(),
+      order_no: 'ORD_' + Date.now(),
       amount: parseFloat(amount).toFixed(2),
       redirect_url: 'https://iphoneclubspayments.vercel.app/success',
+      notify_url: 'https://iphoneclubspayments.vercel.app/api/pay',
       customer_name: name || 'Customer',
       timestamp: Math.floor(Date.now() / 1000).toString(),
     };
